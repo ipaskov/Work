@@ -1,0 +1,59 @@
+setwd("/Volumes/Ivan Paskov/Work")
+
+meta_data = read.csv("metadata_short.csv")
+types = as.vector(unique(meta_data$Biosample.type))
+
+setwd("/Volumes/Ivan Paskov/Work/Results/")
+
+files = read.table("backup_100.txt", header = T)
+rownames(files) = files$file_name
+
+num_types = length(types)
+
+name_holder = mat.or.vec(1,num_types)
+colnames(name_holder) = types
+
+somePDFPath = "/Volumes/Ivan Paskov/Work/Results/plots.pdf"
+pdf(file=somePDFPath)  
+
+
+for (i in 1:num_types) {
+  ind = which(meta_data$Biosample.type == types[i])
+  
+  names = as.character(meta_data[ind, "File.accession"])
+  
+  analysis_names = intersect(names, files$file_name)
+  
+  proper_subset = files[analysis_names,]
+  
+  #title =  paste("Analysis: ", types[i], sep = "")
+  #barplot(c(0,0), main = title)
+  
+  for(j in 1:nrow(proper_subset)) {
+    chrYLength = proper_subset[j,"chrYLength"]
+    chrXLength = proper_subset[j,"chrXLength"]
+    
+    chrYLabel = paste("chrY: ", chrYLength)
+    chrXLabel = paste("chrX: ", chrXLength)
+    
+    counts = table(c(rep(chrYLabel,chrYLength),
+                     rep(chrXLabel,chrXLength)
+    )
+    )
+    
+    gender = proper_subset[j,"gender"]
+    name = proper_subset[j,"file_name"]
+      
+    title = paste(name, ":", gender)
+    
+    if (gender == "female" && chrYLength != 0 || gender == "male" && chrYLength == 0) {
+      barplot(counts, main=title, xlab="Chromosome", col = c('yellow','green'))
+    } else {
+      barplot(counts, main=title, xlab="Chromosome", col = c('red','blue'))
+    }
+    
+  }
+}
+dev.off() 
+
+  
