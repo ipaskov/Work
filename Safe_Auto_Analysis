@@ -1,0 +1,44 @@
+library(Rsamtools)
+#library(RCurl)
+
+setwd("/Volumes/Ivan Paskov/Work")
+
+meta_data = read.csv("metadata_short.csv")
+
+setwd("/Volumes/Ivan Paskov/Work/Downloads/")
+files = dir(pattern = "*.bam")
+
+numFiles = length(files)
+
+col_names = c("file_name", "chrYLength", "chrXLength", "gender")
+
+information = mat.or.vec(numFiles,length(col_names))
+
+colnames(information) = col_names
+
+for (n in 1:numFiles)   
+{ 
+  print(n)
+  bam = scanBam(files[n])
+  
+  chrYLength = length(which(bam[[1]]$rname == "chrY"))
+  chrXLength = length(which(bam[[1]]$rname == "chrX"))
+  
+  name = strsplit(files[n], split = ".bam")[[1]]
+  ind = which(meta_data[,1] == name)
+  gender = as.character(meta_data[ind,"Biosample.sex"]) 
+  
+  information[n, "file_name"] = name
+  information[n, "chrYLength"] = chrYLength
+  information[n, "chrXLength"] = chrXLength
+  information[n, "gender"] = gender
+  
+  file_name = paste("backup_", n,".txt", sep = "")
+  
+  setwd("/Volumes/Ivan Paskov/Work/Results/")
+  write.table(information, file_name, sep="\t",row.names = FALSE, col.names = TRUE, quote = FALSE)  
+  setwd("/Volumes/Ivan Paskov/Work/Downloads/")
+  
+  rm(bam)
+  gc()
+}
