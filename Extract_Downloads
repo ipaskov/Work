@@ -1,0 +1,45 @@
+setwd("/Volumes/Ivan Paskov 1/Work")
+
+meta_data = read.csv("metadata_short.csv")
+types = as.vector(unique(meta_data$Biosample.type))
+
+setwd("/Volumes/Ivan Paskov 1/Work/Results/")
+
+files = read.table("backup_100.txt", header = T)
+rownames(files) = files$file_name
+
+num_types = length(types)
+
+excel = cbind(as.character(files$file_name), as.character(files$gender), as.character(files$chrXLength), as.character(files$chrYLength))
+
+colnames(excel) = c("")
+
+rownames(meta_data) = meta_data[,1]
+
+relevant_names = excel[,1]
+
+additional_cols_Experiment.accession = as.character(meta_data[relevant_names,]$Experiment.accession)
+additional_cols_Biosample.term.id = as.character(meta_data[relevant_names,]$Biosample.term.id)
+
+
+excel = cbind(additional_cols_Biosample.term.id,
+        as.character(files$file_name),
+        additional_cols_Experiment.accession, 
+        as.character(files$gender), 
+        as.character(files$chrXLength), 
+        as.character(files$chrYLength))
+
+colnames(excel) = c("Biosample.term.id", "File.accession", "Experiment.accession", "Sex", "Num_XChrom", "Num_YChrom")
+
+additional_statistical_cols = mat.or.vec(nrow(excel),2)
+colnames(additional_statistical_cols) = c("%_MappedToX", "%_MappedToY")
+  
+for(i in 1:nrow(excel)) {
+  additional_statistical_cols[i,"%_MappedToX"] = 100*as.numeric(excel[i,"Num_XChrom"])/(as.numeric(excel[i,"Num_XChrom"]) + as.numeric(excel[i,"Num_YChrom"]))
+  additional_statistical_cols[i,"%_MappedToY"] = 100*as.numeric(excel[i,"Num_YChrom"])/(as.numeric(excel[i,"Num_XChrom"]) + as.numeric(excel[i,"Num_YChrom"]))
+}
+
+final_excel = cbind(excel,additional_statistical_cols)
+
+write.table(final_excel, "final_excel.txt", sep="\t",row.names = FALSE, col.names = TRUE, quote = FALSE)  
+
