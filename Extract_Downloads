@@ -12,8 +12,6 @@ num_types = length(types)
 
 excel = cbind(as.character(files$file_name), as.character(files$gender), as.character(files$chrXLength), as.character(files$chrYLength))
 
-colnames(excel) = c("")
-
 rownames(meta_data) = meta_data[,1]
 
 relevant_names = excel[,1]
@@ -21,15 +19,25 @@ relevant_names = excel[,1]
 additional_cols_Experiment.accession = as.character(meta_data[relevant_names,]$Experiment.accession)
 additional_cols_Biosample.term.id = as.character(meta_data[relevant_names,]$Biosample.term.id)
 
+additional_cols_Biosample.term.name = as.character(meta_data[relevant_names,]$Biosample.term.name)
+additional_cols_Biosample.type = as.character(meta_data[relevant_names,]$Biosample.type)
+additional_cols_experimentType = rep("ChIP-Seq",length(additional_cols_Biosample.type))
+
+
 
 excel = cbind(additional_cols_Biosample.term.id,
         as.character(files$file_name),
         additional_cols_Experiment.accession, 
+        additional_cols_Biosample.term.name,
+        additional_cols_Biosample.type,
+        additional_cols_experimentType,
         as.character(files$gender), 
         as.character(files$chrXLength), 
         as.character(files$chrYLength))
 
-colnames(excel) = c("Biosample.term.id", "File.accession", "Experiment.accession", "Sex", "Num_XChrom", "Num_YChrom")
+colnames(excel) = c("Biosample.term.id", "File.accession", "Experiment.accession",
+                    "Biosample.term.name", "Biosample.type", "Experiment.Type",
+                    "Sex", "Num_XChrom", "Num_YChrom")
 
 additional_statistical_cols = mat.or.vec(nrow(excel),2)
 colnames(additional_statistical_cols) = c("%_MappedToX", "%_MappedToY")
@@ -41,5 +49,4 @@ for(i in 1:nrow(excel)) {
 
 final_excel = cbind(excel,additional_statistical_cols)
 
-write.table(final_excel, "final_excel.txt", sep="\t",row.names = FALSE, col.names = TRUE, quote = FALSE)  
-
+write.table(final_excel, "final_excel_updated.txt", sep="\t",row.names = FALSE, col.names = TRUE, quote = FALSE)  
